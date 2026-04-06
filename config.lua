@@ -79,6 +79,7 @@ Config.Decay = {
 -- When toxicity reaches or exceeds this value, an overdose is triggered.
 -- ==============================================================================
 Config.Thresholds = {
+    warning = 80,       -- Toxicity level that triggers a warning notification
     overdose = 100,     -- Toxicity level that triggers an overdose
 }
 
@@ -89,10 +90,11 @@ Config.Thresholds = {
 -- These are ONLY used when Config.External.useExternalEffects = false.
 -- ==============================================================================
 Config.Overdose = {
-    killPlayer = true,  -- Kill the player on overdose
-    ragdoll = true,     -- Ragdoll the player before death
-    fadeScreen = true,  -- Fade the screen to black during overdose
-    notify = true,      -- Send a notification to the player
+    warningNotify = true, -- Send a warning notification before overdose
+    killPlayer = true,    -- Kill the player on overdose
+    ragdoll = true,       -- Ragdoll the player before death
+    fadeScreen = true,    -- Fade the screen to black during overdose
+    notify = true,        -- Send a notification to the player
 }
 
 -- ==============================================================================

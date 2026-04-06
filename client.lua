@@ -18,6 +18,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- ==============================================================================
 local toxicity = 0              -- Current toxicity level (0–max)
 local isOverdosing = false      -- Prevent re-triggering during overdose
+local hasWarned = false         -- Prevent warning spam
 local detectedDrugs = {}        -- Auto-detected drugs (received from server + local scan)
 
 -- ==============================================================================
@@ -179,6 +180,7 @@ local function TriggerOverdose()
     -- Reset toxicity after overdose
     toxicity = 0
     isOverdosing = false
+    hasWarned = false
 
     DebugPrint('Toxicity reset after overdose.')
 end
@@ -200,9 +202,15 @@ function AddDrugUse(drugType)
 
     DebugPrint('Drug used: ' .. drugType .. ' | Value: ' .. value .. ' | Total toxicity: ' .. toxicity)
 
-    -- Check overdose threshold
+    -- Check thresholds
     if toxicity >= Config.Thresholds.overdose then
         TriggerOverdose()
+    elseif toxicity >= Config.Thresholds.warning and not hasWarned then
+        hasWarned = true
+        if Config.Overdose.warningNotify then
+            QBCore.Functions.Notify('You are starting to feel very ill...', 'error', 5000)
+        end
+        DebugPrint('Warning triggered! Toxicity: ' .. toxicity)
     end
 end
 
@@ -275,6 +283,7 @@ end)
 -- ==============================================================================
 exports('ResetToxicity', function()
     toxicity = 0
+    hasWarned = false
     DebugPrint('Toxicity manually reset.')
 end)
 
@@ -309,6 +318,12 @@ CreateThread(function()
         if toxicity > 0 then
             toxicity = math.max(0, toxicity - Config.Decay.amount)
             DebugPrint('Toxicity decayed. Current: ' .. toxicity)
+
+            -- Reset warning if we fall below the threshold
+            if hasWarned and toxicity < Config.Thresholds.warning then
+                hasWarned = false
+                DebugPrint('Warning reset (toxicity decayed below threshold).')
+            end
         end
     end
 end)
